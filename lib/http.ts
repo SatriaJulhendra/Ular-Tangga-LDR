@@ -21,10 +21,8 @@ export function guard(req: NextRequest, mutation = false) {
 export function setIdentity(res: NextResponse, code: string, token: string) {
   res.cookies.set("nj_" + code, token, {
     httpOnly: true,
-    sameSite: "strict",
-    secure:
-      process.env.NODE_ENV === "production" &&
-      process.env.COOKIE_SECURE === "true",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/api/rooms",
     maxAge: 86400,
   });

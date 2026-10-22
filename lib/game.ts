@@ -154,10 +154,10 @@ export function reconcile(r: Room, now = Date.now()) {
     r.version++;
     return;
   }
-  const connected = r.players.filter((p) => now - p.seen < 15000);
+  const connected = r.players.filter((p) => now - p.seen < 45000);
   if (connected.length) {
     for (const p of [...r.players])
-      if (now - p.seen > 75000) {
+      if (now - p.seen > 180000) {
         remove(r, p.id);
         r.version++;
       }
@@ -282,15 +282,22 @@ export async function joinRoom(
 
 export async function snapshot(code: string, token: string) {
   const r = await read(code);
+  const versionBefore = r.version;
   reconcile(r);
   const p = r.players.find((p) => p.token === token);
   if (!p) {
-    await save(r);
     throw Error("Sesi pemain tidak valid atau sudah dikeluarkan.");
   }
-  p.seen = Date.now();
-  if (r.status === "LOBBY") r.activity = Date.now();
-  await save(r);
+  const now = Date.now();
+  let needSave = r.version !== versionBefore;
+  if (now - p.seen > 15000) {
+    p.seen = now;
+    if (r.status === "LOBBY") r.activity = now;
+    needSave = true;
+  }
+  if (needSave) {
+    await save(r);
+  }
   return publicRoom(r);
 }
 

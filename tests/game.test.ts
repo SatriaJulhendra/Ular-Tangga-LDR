@@ -211,7 +211,7 @@ test("Host offline diganti dan kartu pemain yang keluar dibatalkan", async () =>
   const host = room.players.find((p) => p.id === a.player.id)!;
   room.active = room.players.indexOf(host);
   room.card = { id: "test", type: "TRUTH", text: "test" };
-  host.seen = Date.now() - 76000;
+  host.seen = Date.now() - 181000;
   reconcile(room);
   assert.notEqual(room.host, host.id);
   assert.equal(room.card, null);

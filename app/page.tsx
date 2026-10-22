@@ -112,28 +112,45 @@ export default function Home() {
   useEffect(() => {
     if (!room?.code) return;
     let alive = true;
-    const controller = new AbortController();
+    let failCount = 0;
     const poll = async () => {
       try {
         const res = await fetch("/api/rooms/" + room.code, {
           cache: "no-store",
-          signal: controller.signal,
         });
         const d = await res.json();
         if (!alive) return;
         if (d.error) {
-          setError(d.error);
-          setConnected(false);
-        } else accept(d.room);
+          failCount++;
+          if (failCount >= 3) {
+            setError(d.error);
+            setConnected(false);
+          }
+        } else {
+          failCount = 0;
+          setConnected(true);
+          accept(d.room);
+        }
       } catch {
-        if (alive) setConnected(false);
+        if (alive) {
+          failCount++;
+          if (failCount >= 3) {
+            setConnected(false);
+          }
+        }
       }
     };
-    const timer = setInterval(poll, 1000);
+    const timer = setInterval(poll, 1500);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        poll();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       alive = false;
       clearInterval(timer);
-      controller.abort();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [room?.code, accept]);
   useEffect(() => {
@@ -595,7 +612,7 @@ export default function Home() {
                               : playing && p.id === active?.id
                                 ? "Sedang bermain"
                                 : `Kotak ${p.position}`}
-                            {now - p.seen > 15000 ? " · Offline" : ""}
+                            {now - p.seen > 45000 ? " · Offline" : ""}
                           </small>
                         </div>
                         {lobby ? (
