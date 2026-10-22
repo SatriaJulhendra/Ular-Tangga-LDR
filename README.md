@@ -79,7 +79,9 @@ Ini adalah implementasi awal yang dapat dimainkan, **belum memenuhi seluruh Defi
 
 ## Konfigurasi dan penyimpanan
 
-- `NJ_DATA_DIR`: lokasi absolut direktori room JSON. Default `data/rooms`.
+- `UPSTASH_REDIS_REST_URL`: REST URL Upstash Redis untuk deployment Serverless (Vercel).
+- `UPSTASH_REDIS_REST_TOKEN`: REST Token Upstash Redis untuk deployment Serverless (Vercel).
+- `NJ_DATA_DIR`: lokasi absolut direktori room JSON lokal. Default `data/rooms`.
 - `COOKIE_SECURE=true`: aktifkan untuk deployment HTTPS pada mode production. Localhost HTTP memakai default `false` agar bisa diuji.
 - `TEST_URL`: URL server untuk smoke HTTP.
 

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest, context: Context) {
     guard(req);
     const { code } = await context.params;
     return NextResponse.json(
-      { room: snapshot(code, req.cookies.get("nj_" + code)?.value || "") },
+      { room: await snapshot(code, req.cookies.get("nj_" + code)?.value || "") },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (e) {
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest, context: Context) {
     const b = await req.json(),
       token = req.cookies.get("nj_" + code)?.value || "";
     if (b.kind === "join") {
-      const result = joinRoom(code, b.name, b.avatar, token);
+      const result = await joinRoom(code, b.name, b.avatar, token);
       const res = NextResponse.json({
         room: result.room,
         playerId: result.player.id,
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest, context: Context) {
       setIdentity(res, code, result.player.token);
       return res;
     }
-    return NextResponse.json({ room: action(code, token, b) });
+    return NextResponse.json({ room: await action(code, token, b) });
   } catch (e) {
     return fail(e);
   }

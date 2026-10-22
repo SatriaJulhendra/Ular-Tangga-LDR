@@ -6,9 +6,12 @@ import {
   renameSync,
   writeFileSync,
 } from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { Redis } from "@upstash/redis";
 import { move } from "./board";
 import { cards, type Pack } from "./content";
+
 export type Player = {
   id: string;
   token: string;
@@ -22,6 +25,7 @@ export type Player = {
   dare: number;
   skipped: number;
 };
+
 export type Room = {
   code: string;
   host: string;
@@ -43,38 +47,75 @@ export type Room = {
   created: number;
   activity: number;
 };
+
 export type PublicRoom = Omit<Room, "receipts" | "used" | "players"> & {
   players: Omit<Player, "token">[];
   serverNow: number;
 };
+
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
+
 function directory() {
-  return process.env.NJ_DATA_DIR || path.join(process.cwd(), "data", "rooms");
+  if (process.env.NJ_DATA_DIR) return process.env.NJ_DATA_DIR;
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return path.join(os.tmpdir(), "rooms");
+  }
+  return path.join(process.cwd(), "data", "rooms");
 }
+
 function file(code: string) {
   if (!/^[A-Z2-9]{6}$/.test(code)) throw Error("Kode room tidak valid.");
   return path.join(directory(), code + ".json");
 }
-function save(r: Room) {
+
+async function roomExists(code: string): Promise<boolean> {
+  if (redis) {
+    const exists = await redis.exists(`room:${code}`);
+    return exists === 1;
+  }
+  return existsSync(file(code));
+}
+
+async function save(r: Room): Promise<void> {
+  if (redis) {
+    await redis.set(`room:${r.code}`, JSON.stringify(r), { ex: 86400 });
+    return;
+  }
   mkdirSync(directory(), { recursive: true });
   const target = file(r.code);
   writeFileSync(target + ".tmp", JSON.stringify(r));
   renameSync(target + ".tmp", target);
 }
-function read(code: string): Room {
+
+async function read(code: string): Promise<Room> {
+  if (redis) {
+    const data = await redis.get<Room | string>(`room:${code}`);
+    if (!data) throw Error("Room tidak ditemukan. Periksa kembali kodenya.");
+    return typeof data === "string" ? JSON.parse(data) : (data as Room);
+  }
   const target = file(code);
   if (!existsSync(target))
     throw Error("Room tidak ditemukan. Periksa kembali kodenya.");
   return JSON.parse(readFileSync(target, "utf8"));
 }
+
 function log(r: Room, message: string) {
   r.log = [message, ...r.log].slice(0, 25);
 }
+
 function next(r: Room, at = Date.now()) {
   r.card = null;
   r.active = (r.active + 1) % r.players.length;
   r.turnId = randomUUID();
   r.deadline = at + 30000;
 }
+
 function finishIfAlone(r: Room) {
   if (r.status === "PLAYING" && r.players.length < 2) {
     r.status = "ABORTED";
@@ -82,6 +123,7 @@ function finishIfAlone(r: Room) {
     r.card = null;
   }
 }
+
 function remove(r: Room, id: string) {
   const i = r.players.findIndex((p) => p.id === id);
   if (i < 0) return;
@@ -101,6 +143,7 @@ function remove(r: Room, id: string) {
     );
   finishIfAlone(r);
 }
+
 export function reconcile(r: Room, now = Date.now()) {
   if (r.status === "LOBBY" && now - r.activity > 1800000)
     throw Error("Room kedaluwarsa setelah 30 menit tidak aktif.");
@@ -134,6 +177,7 @@ export function reconcile(r: Room, now = Date.now()) {
     }
   }
 }
+
 function nameOf(value: unknown) {
   if (typeof value !== "string") throw Error("Masukkan nama.");
   const name = value.trim().replace(/\s+/g, " ");
@@ -141,6 +185,7 @@ function nameOf(value: unknown) {
     throw Error("Nama harus 2–20 karakter.");
   return name;
 }
+
 function player(name: unknown, avatar: unknown): Player {
   return {
     id: randomUUID(),
@@ -159,15 +204,18 @@ function player(name: unknown, avatar: unknown): Player {
     skipped: 0,
   };
 }
-export function createRoom(name: unknown, avatar: unknown) {
+
+export async function createRoom(name: unknown, avatar: unknown) {
   const p = player(name, avatar);
   let code = "";
+  let exists = false;
   do {
     code = Array.from(
       { length: 6 },
       () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[randomInt(32)],
     ).join("");
-  } while (existsSync(file(code)));
+    exists = await roomExists(code);
+  } while (exists);
   const r: Room = {
     code,
     host: p.id,
@@ -189,9 +237,10 @@ export function createRoom(name: unknown, avatar: unknown) {
     created: Date.now(),
     activity: Date.now(),
   };
-  save(r);
+  await save(r);
   return { room: publicRoom(r), player: p };
 }
+
 export function publicRoom(r: Room): PublicRoom {
   const { receipts, used, players, ...rest } = r;
   return {
@@ -200,18 +249,19 @@ export function publicRoom(r: Room): PublicRoom {
     serverNow: Date.now(),
   };
 }
-export function joinRoom(
+
+export async function joinRoom(
   code: string,
   name: unknown,
   avatar: unknown,
   token?: string,
 ) {
-  const r = read(code);
+  const r = await read(code);
   reconcile(r);
   const existing = r.players.find((p) => p.token === token);
   if (existing) {
     existing.seen = Date.now();
-    save(r);
+    await save(r);
     return { room: publicRoom(r), player: existing };
   }
   if (r.status !== "LOBBY")
@@ -226,22 +276,24 @@ export function joinRoom(
   r.version++;
   r.activity = Date.now();
   log(r, `${p.name} bergabung.`);
-  save(r);
+  await save(r);
   return { room: publicRoom(r), player: p };
 }
-export function snapshot(code: string, token: string) {
-  const r = read(code);
+
+export async function snapshot(code: string, token: string) {
+  const r = await read(code);
   reconcile(r);
   const p = r.players.find((p) => p.token === token);
   if (!p) {
-    save(r);
+    await save(r);
     throw Error("Sesi pemain tidak valid atau sudah dikeluarkan.");
   }
   p.seen = Date.now();
   if (r.status === "LOBBY") r.activity = Date.now();
-  save(r);
+  await save(r);
   return publicRoom(r);
 }
+
 export function applyRoll(r: Room, dice: number) {
   const p = r.players[r.active],
     result = move(p.position, dice);
@@ -278,14 +330,15 @@ export function applyRoll(r: Room, dice: number) {
     r.deadline = Date.now() + (r.timer || card.durationSeconds) * 1000;
   } else next(r);
 }
-export function action(
+
+export async function action(
   code: string,
   token: string,
   body: Record<string, unknown>,
 ) {
-  const r = read(code);
+  const r = await read(code);
   reconcile(r);
-  save(r);
+  await save(r);
   const p = r.players.find((x) => x.token === token);
   if (!p) throw Error("Sesi pemain tidak valid.");
   if (typeof body.actionId !== "string" || body.actionId.length > 80)
@@ -379,6 +432,6 @@ export function action(
   r.version++;
   r.activity = Date.now();
   r.receipts = [...r.receipts, receipt].slice(-300);
-  save(r);
+  await save(r);
   return publicRoom(r);
 }

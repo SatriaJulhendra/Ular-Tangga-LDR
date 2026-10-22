@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     guard(req, true);
     const b = await req.json();
-    const result = createRoom(b.name, b.avatar);
+    const result = await createRoom(b.name, b.avatar);
     const res = NextResponse.json({
       room: result.room,
       playerId: result.player.id,
