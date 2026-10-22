@@ -229,17 +229,20 @@ test("Rematch mereset posisi dan kesiapan; pengaturan mereset siap", async () =>
   assert.ok(r.players.every((p) => p.position === 0 && !p.ready));
   await send(room.code, a.player.token, "ready");
   r = await send(room.code, a.player.token, "settings", {
-    pack: "Keluarga",
     timer: 90,
   });
   assert.ok(r.players.every((p) => !p.ready));
 });
 
-test("300 kartu awal dan deck tidak mengulang sebelum habis", async () => {
-  assert.equal(cards.length, 300);
+test("Deck kartu dan tidak mengulang sebelum habis", async () => {
+  const truthCards = cards.filter((c) => c.type === "TRUTH");
+  const dareCards = cards.filter((c) => c.type === "DARE");
+  assert.ok(truthCards.length > 0);
+  assert.ok(dareCards.length > 0);
+  assert.equal(cards.length, truthCards.length + dareCards.length);
   const { room } = await setup();
   const seen = new Set<string>();
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < truthCards.length; i++) {
     room.players[room.active].position = 0;
     room.card = null;
     applyRoll(room, 2);

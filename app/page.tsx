@@ -345,7 +345,7 @@ export default function Home() {
               <div>
                 <span className="tiny-dot" />{" "}
                 {room
-                  ? `PAKET ${room.pack.toUpperCase()}`
+                  ? "ULAR TANGGA LDR"
                   : "PAPAN PENUH KEJUTAN"}
               </div>
               <span>
@@ -648,22 +648,6 @@ export default function Home() {
                   <section className="card">
                     <span className="section-kicker">SEBELUM PERJALANAN</span>
                     <h2>Atur suasananya.</h2>
-                    <label htmlFor="pack">Paket kartu</label>
-                    <select
-                      id="pack"
-                      value={room.pack}
-                      disabled={!isHost || busy}
-                      onChange={(e) =>
-                        act("settings", {
-                          pack: e.target.value,
-                          timer: room.timer,
-                        })
-                      }
-                    >
-                      <option>Keluarga</option>
-                      <option>Teman</option>
-                      <option>Pasangan</option>
-                    </select>
                     <label htmlFor="timer">Waktu kartu</label>
                     <select
                       id="timer"
@@ -671,7 +655,6 @@ export default function Home() {
                       disabled={!isHost || busy}
                       onChange={(e) =>
                         act("settings", {
-                          pack: room.pack,
                           timer: Number(e.target.value),
                         })
                       }

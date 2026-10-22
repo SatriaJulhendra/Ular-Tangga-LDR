@@ -10,7 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { Redis } from "@upstash/redis";
 import { move } from "./board";
-import { cards, type Pack } from "./content";
+import { cards } from "./content";
 
 export type Player = {
   id: string;
@@ -30,7 +30,7 @@ export type Room = {
   code: string;
   host: string;
   players: Player[];
-  pack: Pack;
+  pack?: string;
   timer: number;
   status: "LOBBY" | "PLAYING" | "FINISHED" | "ABORTED";
   version: number;
@@ -220,7 +220,6 @@ export async function createRoom(name: unknown, avatar: unknown) {
     code,
     host: p.id,
     players: [p],
-    pack: "Teman",
     timer: 0,
     status: "LOBBY",
     version: 1,
@@ -319,17 +318,12 @@ export function applyRoll(r: Room, dice: number) {
   }
   if (result.type === "TRUTH" || result.type === "DARE") {
     let pool = cards.filter(
-      (c) =>
-        c.pack === r.pack && c.type === result.type && !r.used.includes(c.id),
+      (c) => c.type === result.type && !r.used.includes(c.id),
     );
     if (!pool.length) {
       const last = r.used.at(-1);
-      r.used = r.used.filter(
-        (id) => !id.startsWith(`${r.pack}-${result.type}-`),
-      );
-      pool = cards.filter(
-        (c) => c.pack === r.pack && c.type === result.type && c.id !== last,
-      );
+      r.used = r.used.filter((id) => !id.startsWith(`${result.type}-`));
+      pool = cards.filter((c) => c.type === result.type && c.id !== last);
     }
     const card = pool[randomInt(pool.length)];
     r.used.push(card.id);
@@ -366,12 +360,13 @@ export async function action(
     if (r.status !== "LOBBY" || r.host !== p.id)
       throw Error("Hanya host dapat mengatur lobby.");
     if (
-      !["Keluarga", "Teman", "Pasangan"].includes(String(body.pack)) ||
+      body.timer !== undefined &&
       ![0, 60, 90, 120].includes(Number(body.timer))
     )
       throw Error("Pengaturan tidak valid.");
-    r.pack = body.pack as Pack;
-    r.timer = Number(body.timer);
+    if (body.timer !== undefined) {
+      r.timer = Number(body.timer);
+    }
     r.players.forEach((p) => (p.ready = false));
   } else if (kind === "ready") {
     if (r.status !== "LOBBY") throw Error("Lobby sudah ditutup.");
