@@ -51,11 +51,11 @@ export function validateBoard() {
     new Set(board.map((t) => t.number)).size !== 100 ||
     board.some((t, i) => t.number !== i + 1)
   )
-    throw Error("Nomor papan tidak valid");
+    throw Error("Invalid board numbering");
   for (const [type, count] of Object.entries(expected))
     if (board.filter((t) => t.type === type).length !== count)
-      throw Error("Distribusi " + type + " tidak valid");
-  if (board[99].type !== "EMPTY") throw Error("Finish harus netral");
+      throw Error("Invalid distribution for " + type);
+  if (board[99].type !== "EMPTY") throw Error("Finish must be neutral");
   for (const t of board)
     if (
       t.destination &&
@@ -65,7 +65,7 @@ export function validateBoard() {
           ? t.destination <= t.number
           : t.destination >= t.number))
     )
-      throw Error("Koneksi tidak valid");
+      throw Error("Invalid connection");
   return true;
 }
 validateBoard();

@@ -62,7 +62,7 @@ async function setup() {
   return { a, b, room: load(a.room.code) };
 }
 
-test("Blueprint memiliki 100 kotak dengan distribusi persis dan nomor zig-zag", () => {
+test("Blueprint has 100 tiles with exact distribution and zig-zag numbering", () => {
   assert.equal(validateBoard(), true);
   assert.equal(board.filter((t) => t.type === "EMPTY").length, 15);
   assert.deepEqual(coordinate(1), { x: 5, y: 95 });
@@ -70,7 +70,7 @@ test("Blueprint memiliki 100 kotak dengan distribusi persis dan nomor zig-zag", 
   assert.equal(coordinate(11).x, 95);
 });
 
-test("Tangga dan ular tidak memicu kartu tujuan", async () => {
+test("Ladders and snakes do not trigger destination tile cards", async () => {
   assert.deepEqual(move(0, 3), { position: 22, landed: 3, type: "LADDER" });
   assert.deepEqual(move(92, 6), { position: 79, landed: 98, type: "SNAKE" });
   const { room } = await setup();
@@ -79,7 +79,7 @@ test("Tangga dan ular tidak memicu kartu tujuan", async () => {
   assert.equal(room.card, null);
 });
 
-test("Harus tepat mencapai 100, angka berlebih tidak memindahkan pion", async () => {
+test("Must land exactly on 100, overshoot keeps token in place", async () => {
   assert.equal(move(97, 4).position, 97);
   const { room } = await setup();
   room.players[room.active].position = 97;
@@ -89,7 +89,7 @@ test("Harus tepat mencapai 100, angka berlebih tidak memindahkan pion", async ()
   assert.equal(room.winner, current);
 });
 
-test("Dadu 6 tidak memberikan giliran tambahan", async () => {
+test("Rolling a 6 does not grant an extra turn", async () => {
   const { room } = await setup();
   const first = room.players[room.active].id;
   applyRoll(room, 6);
@@ -100,22 +100,22 @@ test("Dadu 6 tidak memberikan giliran tambahan", async () => {
   assert.notEqual(r.players[r.active].id, first);
 });
 
-test("Hanya pemain aktif dapat roll dan hanya host dapat start/settings/kick", async () => {
+test("Only active player can roll and only host can start/settings/kick", async () => {
   const { room } = await setup();
   const other = room.players[(room.active + 1) % 2];
   await assert.rejects(
     async () => await send(room.code, other.token, "roll"),
-    /Bukan giliran/,
+    /not your turn/i,
   );
   const guest = room.players.find((p) => p.id !== room.host)!;
   await assert.rejects(
     async () =>
       await send(room.code, guest.token, "kick", { target: room.host }),
-    /Hanya host/,
+    /only the host/i,
   );
 });
 
-test("Lewati minimum 0 dan tidak menjalankan efek kotak penalti", async () => {
+test("Skip penalty moves back 3 with minimum 0 and no penalty tile effects", async () => {
   const { room } = await setup();
   room.card = { id: "test", text: "test", type: "TRUTH" };
   room.players[room.active].position = 2;
@@ -135,7 +135,7 @@ test("Lewati minimum 0 dan tidak menjalankan efek kotak penalti", async () => {
   assert.equal(r.card, null);
 });
 
-test("Aksi duplikat tidak menggandakan roll; state lama ditolak", async () => {
+test("Duplicate actions do not double roll; stale state is rejected", async () => {
   const { room } = await setup();
   const token = room.players[room.active].token;
   const b = {
@@ -154,11 +154,11 @@ test("Aksi duplikat tidak menggandakan roll; state lama ditolak", async () => {
   );
   await assert.rejects(
     async () => await action(room.code, token, { ...b, actionId: randomUUID() }),
-    /Status permainan berubah/,
+    /game state changed/i,
   );
 });
 
-test("Timeout kartu dan aksi terlambat hanya diresolusi sekali", async () => {
+test("Card timeout and late actions are only resolved once", async () => {
   const { room } = await setup();
   const id = room.players[room.active].id,
     token = room.players[room.active].token;
@@ -174,7 +174,7 @@ test("Timeout kartu dan aksi terlambat hanya diresolusi sekali", async () => {
         turnId: room.turnId,
         actionId: randomUUID(),
       }),
-    /Status permainan berubah/,
+    /game state changed/i,
   );
   const r = await snapshot(room.code, token);
   assert.equal(r.players.find((p) => p.id === id)?.position, 31);
@@ -182,10 +182,10 @@ test("Timeout kartu dan aksi terlambat hanya diresolusi sekali", async () => {
   assert.equal((await snapshot(room.code, token)).version, r.version);
 });
 
-test("Reconnect mempertahankan identitas dan snapshot tidak membocorkan token", async () => {
+test("Reconnect preserves identity and snapshot does not leak player tokens", async () => {
   const { a, room } = await setup();
   const before = load(room.code);
-  const rejoin = await joinRoom(room.code, "Nama lain", 4, a.player.token);
+  const rejoin = await joinRoom(room.code, "Other Name", 4, a.player.token);
   assert.equal(rejoin.player.id, a.player.id);
   const snap = await snapshot(room.code, a.player.token);
   assert.equal("token" in snap.players[0], false);
@@ -193,20 +193,20 @@ test("Reconnect mempertahankan identitas dan snapshot tidak membocorkan token", 
   assert.equal(snap.deadline, before.deadline);
 });
 
-test("Kick mencabut token dan mengakhiri sesi saat tinggal satu pemain", async () => {
+test("Kick revokes token and aborts session when only one player remains", async () => {
   const { a, b, room } = await setup();
   const r = await send(room.code, a.player.token, "kick", { target: b.player.id });
   assert.equal(r.status, "ABORTED");
   assert.equal(r.winner, null);
   await assert.rejects(
     async () => await snapshot(room.code, b.player.token),
-    /tidak valid/,
+    /invalid/i,
   );
 });
 
-test("Host offline diganti dan kartu pemain yang keluar dibatalkan", async () => {
+test("Offline host is replaced and disconnected player's card is canceled", async () => {
   const { a, room } = await setup();
-  const third = await createRoom("Lain", 1);
+  const third = await createRoom("Other", 1);
   assert.notEqual(third.room.code, room.code);
   const host = room.players.find((p) => p.id === a.player.id)!;
   room.active = room.players.indexOf(host);
@@ -218,7 +218,7 @@ test("Host offline diganti dan kartu pemain yang keluar dibatalkan", async () =>
   assert.equal(room.status, "ABORTED");
 });
 
-test("Rematch mereset posisi dan kesiapan; pengaturan mereset siap", async () => {
+test("Rematch resets positions and readiness; settings reset ready", async () => {
   const { a, room } = await setup();
   room.status = "FINISHED";
   room.winner = a.player.id;
@@ -234,7 +234,7 @@ test("Rematch mereset posisi dan kesiapan; pengaturan mereset siap", async () =>
   assert.ok(r.players.every((p) => !p.ready));
 });
 
-test("Deck kartu dan tidak mengulang sebelum habis", async () => {
+test("Card deck does not repeat before being exhausted", async () => {
   const truthCards = cards.filter((c) => c.type === "TRUTH");
   const dareCards = cards.filter((c) => c.type === "DARE");
   assert.ok(truthCards.length > 0);
@@ -258,17 +258,17 @@ test("Deck kartu dan tidak mengulang sebelum habis", async () => {
   assert.notEqual((room as Room).card!.id, last);
 });
 
-test("Validasi nama, room penuh, dan sesi berjalan", async () => {
+test("Name validation, room full, and game in progress", async () => {
   await assert.rejects(async () => await createRoom("A", 0), /2–20/);
   const a = await createRoom("Rani", 0);
-  for (let i = 0; i < 5; i++) await joinRoom(a.room.code, "Tamu " + i, 0);
+  for (let i = 0; i < 5; i++) await joinRoom(a.room.code, "Guest " + i, 0);
   await assert.rejects(
-    async () => await joinRoom(a.room.code, "Tamu lebih", 0),
-    /penuh/,
+    async () => await joinRoom(a.room.code, "Extra guest", 0),
+    /full/i,
   );
   const { room } = await setup();
   await assert.rejects(
-    async () => await joinRoom(room.code, "Baru", 0),
-    /berjalan/,
+    async () => await joinRoom(room.code, "New", 0),
+    /progress/i,
   );
 });

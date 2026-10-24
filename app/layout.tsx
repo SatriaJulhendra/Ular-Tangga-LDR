@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: "Naik Jujur, Turun Berani — Ular Tangga",
+  title: "Naik Jujur — Snakes & Ladders with Truth or Dare",
   description:
-    "Ular tangga online dengan kejutan Truth or Dare. Buat room, ajak teman, dan mulai cerita.",
+    "Online multiplayer snakes & ladders with Truth or Dare twists. Create a room, invite friends, and share stories.",
 };
 export default function Layout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

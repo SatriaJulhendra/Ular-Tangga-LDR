@@ -70,7 +70,7 @@ function directory() {
 }
 
 function file(code: string) {
-  if (!/^[A-Z2-9]{6}$/.test(code)) throw Error("Kode room tidak valid.");
+  if (!/^[A-Z2-9]{6}$/.test(code)) throw Error("Invalid room code.");
   return path.join(directory(), code + ".json");
 }
 
@@ -96,12 +96,12 @@ async function save(r: Room): Promise<void> {
 async function read(code: string): Promise<Room> {
   if (redis) {
     const data = await redis.get<Room | string>(`room:${code}`);
-    if (!data) throw Error("Room tidak ditemukan. Periksa kembali kodenya.");
+    if (!data) throw Error("Room not found. Please check the code.");
     return typeof data === "string" ? JSON.parse(data) : (data as Room);
   }
   const target = file(code);
   if (!existsSync(target))
-    throw Error("Room tidak ditemukan. Periksa kembali kodenya.");
+    throw Error("Room not found. Please check the code.");
   return JSON.parse(readFileSync(target, "utf8"));
 }
 
@@ -119,7 +119,7 @@ function next(r: Room, at = Date.now()) {
 function finishIfAlone(r: Room) {
   if (r.status === "PLAYING" && r.players.length < 2) {
     r.status = "ABORTED";
-    r.reason = "Pemain lain telah keluar. Sesi berakhir tanpa pemenang.";
+    r.reason = "Other players have left. Session ended without a winner.";
     r.card = null;
   }
 }
@@ -130,7 +130,7 @@ function remove(r: Room, id: string) {
   const current = r.players[r.active]?.id;
   const p = r.players[i];
   r.players.splice(i, 1);
-  log(r, `${p.name} keluar dari room.`);
+  log(r, `${p.name} left the room.`);
   if (r.host === id)
     r.host = [...r.players].sort((a, b) => a.joined - b.joined)[0]?.id || "";
   if (current === id && r.players.length) {
@@ -146,10 +146,10 @@ function remove(r: Room, id: string) {
 
 export function reconcile(r: Room, now = Date.now()) {
   if (r.status === "LOBBY" && now - r.activity > 1800000)
-    throw Error("Room kedaluwarsa setelah 30 menit tidak aktif.");
+    throw Error("Room expired after 30 minutes of inactivity.");
   if (r.status === "PLAYING" && r.players.every((p) => now - p.seen > 300000)) {
     r.status = "ABORTED";
-    r.reason = "Semua pemain terputus selama 5 menit.";
+    r.reason = "All players disconnected for 5 minutes.";
     r.card = null;
     r.version++;
     return;
@@ -170,8 +170,8 @@ export function reconcile(r: Room, now = Date.now()) {
       if (r.card) {
         p.position = Math.max(0, p.position - 3);
         p.skipped++;
-        log(r, `Waktu ${p.name} habis. Mundur 3 kotak.`);
-      } else log(r, `${p.name} melewatkan waktu lempar dadu.`);
+        log(r, `${p.name}'s time ran out. Moved back 3 tiles.`);
+      } else log(r, `${p.name} missed the dice roll window.`);
       next(r, deadline);
       r.version++;
     }
@@ -179,10 +179,10 @@ export function reconcile(r: Room, now = Date.now()) {
 }
 
 function nameOf(value: unknown) {
-  if (typeof value !== "string") throw Error("Masukkan nama.");
+  if (typeof value !== "string") throw Error("Please enter a name.");
   const name = value.trim().replace(/\s+/g, " ");
   if (name.length < 2 || name.length > 20)
-    throw Error("Nama harus 2–20 karakter.");
+    throw Error("Name must be 2–20 characters.");
   return name;
 }
 
@@ -230,7 +230,7 @@ export async function createRoom(name: unknown, avatar: unknown) {
     card: null,
     winner: null,
     reason: "",
-    log: ["Room dibuat. Ajak temanmu bergabung!"],
+    log: ["Room created. Invite your friends to join!"],
     used: [],
     receipts: [],
     created: Date.now(),
@@ -264,8 +264,8 @@ export async function joinRoom(
     return { room: publicRoom(r), player: existing };
   }
   if (r.status !== "LOBBY")
-    throw Error("Sesi sudah berjalan atau selesai. Tunggu lobby baru.");
-  if (r.players.length >= 6) throw Error("Room penuh (maksimal 6 pemain).");
+    throw Error("Game is already in progress or finished. Wait for a new lobby.");
+  if (r.players.length >= 6) throw Error("Room is full (maximum 6 players).");
   const p = player(name, avatar);
   const base = p.name;
   let suffix = 2;
@@ -274,7 +274,7 @@ export async function joinRoom(
   r.players.push(p);
   r.version++;
   r.activity = Date.now();
-  log(r, `${p.name} bergabung.`);
+  log(r, `${p.name} joined.`);
   await save(r);
   return { room: publicRoom(r), player: p };
 }
@@ -285,7 +285,7 @@ export async function snapshot(code: string, token: string) {
   reconcile(r);
   const p = r.players.find((p) => p.token === token);
   if (!p) {
-    throw Error("Sesi pemain tidak valid atau sudah dikeluarkan.");
+    throw Error("Player session is invalid or has been removed.");
   }
   const now = Date.now();
   let needSave = r.version !== versionBefore;
@@ -307,13 +307,13 @@ export function applyRoll(r: Room, dice: number) {
   p.position = result.position;
   log(
     r,
-    `${p.name} mendapat ${dice}. ${result.type === "OVERSHOOT" ? "Melebihi 100, tetap di tempat." : result.type === "LADDER" ? `Naik tangga: ${result.landed} → ${result.position}.` : result.type === "SNAKE" ? `Turun ular: ${result.landed} → ${result.position}.` : `Berhenti di kotak ${result.position}.`}`,
+    `${p.name} rolled ${dice}. ${result.type === "OVERSHOOT" ? "Exceeded 100, staying in place." : result.type === "LADDER" ? `Climbed ladder: ${result.landed} → ${result.position}.` : result.type === "SNAKE" ? `Slid down snake: ${result.landed} → ${result.position}.` : `Landed on tile ${result.position}.`}`,
   );
   if (p.position === 100) {
     r.status = "FINISHED";
     r.winner = p.id;
     r.card = null;
-    log(r, `${p.name} mencapai 100 dan menang!`);
+    log(r, `${p.name} reached 100 and won!`);
     return;
   }
   if (result.type === "TRUTH" || result.type === "DARE") {
@@ -341,35 +341,35 @@ export async function action(
   reconcile(r);
   await save(r);
   const p = r.players.find((x) => x.token === token);
-  if (!p) throw Error("Sesi pemain tidak valid.");
+  if (!p) throw Error("Invalid player session.");
   if (typeof body.actionId !== "string" || body.actionId.length > 80)
-    throw Error("ID aksi tidak valid.");
+    throw Error("Invalid action ID.");
   const receipt = `${p.id}:${body.actionId}`;
   if (r.receipts.includes(receipt)) return publicRoom(r);
   if (body.version !== r.version)
-    throw Error("Status permainan berubah. Coba lagi setelah sinkronisasi.");
+    throw Error("Game state changed. Please try again after syncing.");
   p.seen = Date.now();
   const kind = body.kind;
   if (kind === "leave") {
     remove(r, p.id);
   } else if (kind === "kick") {
-    if (r.host !== p.id) throw Error("Hanya host dapat mengeluarkan pemain.");
-    if (body.target === p.id) throw Error("Gunakan tombol keluar.");
+    if (r.host !== p.id) throw Error("Only the host can kick players.");
+    if (body.target === p.id) throw Error("Use the leave button instead.");
     remove(r, String(body.target));
   } else if (kind === "settings") {
     if (r.status !== "LOBBY" || r.host !== p.id)
-      throw Error("Hanya host dapat mengatur lobby.");
+      throw Error("Only the host can configure lobby settings.");
     if (
       body.timer !== undefined &&
       ![0, 60, 90, 120].includes(Number(body.timer))
     )
-      throw Error("Pengaturan tidak valid.");
+      throw Error("Invalid settings.");
     if (body.timer !== undefined) {
       r.timer = Number(body.timer);
     }
     r.players.forEach((p) => (p.ready = false));
   } else if (kind === "ready") {
-    if (r.status !== "LOBBY") throw Error("Lobby sudah ditutup.");
+    if (r.status !== "LOBBY") throw Error("Lobby is already closed.");
     p.ready = !p.ready;
   } else if (kind === "start") {
     if (
@@ -378,7 +378,7 @@ export async function action(
       r.players.length < 2 ||
       !r.players.every((p) => p.ready)
     )
-      throw Error("Butuh 2–6 pemain dan semua harus siap.");
+      throw Error("Requires 2–6 players and everyone must be ready.");
     for (let i = r.players.length - 1; i > 0; i--) {
       const j = randomInt(i + 1);
       [r.players[i], r.players[j]] = [r.players[j], r.players[i]];
@@ -386,10 +386,10 @@ export async function action(
     r.status = "PLAYING";
     r.active = r.players.length - 1;
     next(r);
-    log(r, "Permainan dimulai. Urutan pemain telah diacak.");
+    log(r, "Game started. Turn order has been randomized.");
   } else if (kind === "rematch") {
     if (!["FINISHED", "ABORTED"].includes(r.status) || r.host !== p.id)
-      throw Error("Hanya host dapat membuka lobby baru setelah sesi berakhir.");
+      throw Error("Only the host can open a new lobby after the session ends.");
     r.status = "LOBBY";
     r.winner = null;
     r.reason = "";
@@ -403,34 +403,34 @@ export async function action(
       p.dare = 0;
       p.skipped = 0;
     });
-    log(r, "Lobby baru dibuka. Semua pemain perlu siap kembali.");
+    log(r, "New lobby opened. All players need to ready up again.");
   } else if (["roll", "complete", "skip"].includes(String(kind))) {
     if (
       r.status !== "PLAYING" ||
       r.players[r.active]?.id !== p.id ||
       body.turnId !== r.turnId
     )
-      throw Error("Bukan giliranmu atau giliran sudah berakhir.");
+      throw Error("It is not your turn or your turn has expired.");
     if (kind === "roll") {
-      if (r.card) throw Error("Selesaikan kartu terlebih dahulu.");
+      if (r.card) throw Error("Please complete the active card first.");
       applyRoll(r, randomInt(1, 7));
     } else {
-      if (!r.card) throw Error("Tidak ada kartu aktif.");
+      if (!r.card) throw Error("No active card.");
       if (kind === "skip") {
         p.position = Math.max(0, p.position - 3);
         p.skipped++;
-        log(r, `${p.name} melewati kartu. Mundur 3 ke ${p.position}.`);
+        log(r, `${p.name} skipped the card. Moved back 3 tiles to ${p.position}.`);
       } else {
         if (r.card.type === "TRUTH") p.truth++;
         else p.dare++;
         log(
           r,
-          `${p.name} menyelesaikan ${r.card.type === "TRUTH" ? "Truth" : "Dare"}.`,
+          `${p.name} completed ${r.card.type === "TRUTH" ? "Truth" : "Dare"}.`,
         );
       }
       next(r);
     }
-  } else throw Error("Aksi tidak dikenal.");
+  } else throw Error("Unknown action.");
   r.version++;
   r.activity = Date.now();
   r.receipts = [...r.receipts, receipt].slice(-300);

@@ -6,15 +6,15 @@ export function guard(req: NextRequest, mutation = false) {
     req.headers.get("origin") &&
     new URL(req.headers.get("origin")!).host !== req.headers.get("host")
   )
-    throw Error("Origin permintaan tidak diizinkan.");
+    throw Error("Request origin not allowed.");
   if (Number(req.headers.get("content-length") || 0) > 4096)
-    throw Error("Permintaan terlalu besar.");
+    throw Error("Request payload too large.");
   const key = req.headers.get("x-forwarded-for")?.split(",")[0] || "local";
   const now = Date.now(),
     entry = limits.get(key);
   if (!entry || now - entry.at > 60000) limits.set(key, { at: now, count: 1 });
   else if (++entry.count > 900)
-    throw Error("Terlalu banyak permintaan. Tunggu sebentar.");
+    throw Error("Too many requests. Please wait a moment.");
   if (limits.size > 10000)
     for (const [k, v] of limits) if (now - v.at > 60000) limits.delete(k);
 }
@@ -33,7 +33,7 @@ export function fail(e: unknown) {
       error:
         e instanceof Error
           ? e.message
-          : "Terjadi kesalahan. Silakan coba lagi.",
+          : "An error occurred. Please try again.",
     },
     { status: 400 },
   );

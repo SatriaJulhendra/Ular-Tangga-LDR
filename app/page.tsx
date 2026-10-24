@@ -4,9 +4,9 @@ import { board, coordinate, ladders, snakes } from "../lib/board";
 import type { PublicRoom } from "../lib/game";
 const avatars = ["🐯", "🐸", "🐱", "🐼", "🦊", "🐰"];
 const labels = {
-  EMPTY: "Netral",
-  LADDER: "Tangga",
-  SNAKE: "Ular",
+  EMPTY: "Neutral",
+  LADDER: "Ladder",
+  SNAKE: "Snake",
   TRUTH: "Truth",
   DARE: "Dare",
 };
@@ -235,7 +235,7 @@ export default function Home() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Tautan: " + location.origin + "?room=" + room!.code);
+      setError("Link: " + location.origin + "?room=" + room!.code);
     }
   }
   const me = room?.players.find((p) => p.id === myId),
@@ -256,23 +256,23 @@ export default function Home() {
   return (
     <>
       <header className="header">
-        <a className="brand" href="/" aria-label="Beranda">
+        <a className="brand" href="/" aria-label="Home">
           <span className="brand-icon">↗</span>
           <span>
             naik<span className="brand-light">jujur.</span>
-            <small>ULAR TANGGA · TRUTH OR DARE</small>
+            <small>SNAKES & LADDERS · TRUTH OR DARE</small>
           </span>
         </a>
         <nav>
           <span className="header-note">
-            Sedikit keberuntungan. Banyak cerita.
+            A little luck. A lot of stories.
           </span>
           <button className="text-button" onClick={() => setRules(true)}>
-            ⓘ <span>Cara main</span>
+            ⓘ <span>How to play</span>
           </button>
           {room && (
             <button className="text-button" onClick={() => act("leave")}>
-              Keluar ↗
+              Leave ↗
             </button>
           )}
         </nav>
@@ -282,33 +282,33 @@ export default function Home() {
           <div>
             <div className="eyebrow">
               <span />{" "}
-              {room ? "RUANG BERMAIN BERSAMA" : "MALAM INI, BIKIN CERITA BARU"}
+              {room ? "SHARED PLAYROOM" : "TONIGHT, CREATE NEW STORIES"}
             </div>
             <h1>
               {room ? (
                 lobby ? (
-                  "Semua sudah kumpul?"
+                  "Is everyone here?"
                 ) : (
-                  "Naik jujur, turun berani."
+                  "Climb honest, slide brave."
                 )
               ) : (
                 <>
-                  Naik jujur.
-                  <br /> Turun <em>berani.</em>
+                  Climb honest.
+                  <br /> Slide <em>brave.</em>
                 </>
               )}
             </h1>
             <p>
               {room
                 ? lobby
-                  ? "Siapkan diri. Perjalanan seru dimulai dari sini."
-                  : "Satu papan, seratus kejutan. Nikmati setiap giliran."
-                : "Ular tangga klasik, dengan pertanyaan dan tantangan yang bikin makin dekat."}
+                  ? "Get ready. An exciting journey begins here."
+                  : "One board, a hundred surprises. Enjoy every turn."
+                : "Classic snakes and ladders, with questions and challenges that bring you closer."}
             </p>
           </div>
           {room ? (
             <div className="room-pill">
-              <small>ROOM PRIVAT</small>
+              <small>PRIVATE ROOM</small>
               <button onClick={copy}>
                 {room.code} <span>{copied ? "✓" : "⧉"}</span>
               </button>
@@ -317,9 +317,9 @@ export default function Home() {
             <div className="hero-aside">
               <span className="little-spark">✳</span>
               <p>
-                Bukan cuma soal
+                It's not just about
                 <br />
-                <b>siapa yang sampai duluan.</b>
+                <b>who reaches the finish line first.</b>
               </p>
             </div>
           )}
@@ -327,29 +327,29 @@ export default function Home() {
         {error && (
           <div className="error" role="alert">
             {error}
-            <button onClick={() => setError("")} aria-label="Tutup pesan">
+            <button onClick={() => setError("")} aria-label="Close message">
               ×
             </button>
-            {room && !me && <button onClick={exit}>Kembali</button>}
+            {room && !me && <button onClick={exit}>Back</button>}
           </div>
         )}
         {room && !connected && (
           <div className="connection" role="status">
-            Koneksi terganggu. Mencoba menyambungkan kembali…{" "}
-            <button onClick={exit}>Kembali ke beranda</button>
+            Connection disrupted. Reconnecting…{" "}
+            <button onClick={exit}>Back to home</button>
           </div>
         )}
         <div className="game-layout">
-          <section className="board-panel" aria-label="Papan ular tangga">
+          <section className="board-panel" aria-label="Snakes and ladders board">
             <div className="board-heading">
               <div>
                 <span className="tiny-dot" />{" "}
                 {room
-                  ? "ULAR TANGGA LDR"
-                  : "PAPAN PENUH KEJUTAN"}
+                  ? "LDR SNAKES & LADDERS"
+                  : "A BOARD FULL OF SURPRISES"}
               </div>
               <span>
-                {room ? "2–6 PEMAIN · TEPAT 100" : "100 KOTAK · 1 TUJUAN"}
+                {room ? "2–6 PLAYERS · EXACT 100" : "100 TILES · 1 GOAL"}
               </span>
             </div>
             <div className="board">
@@ -363,7 +363,7 @@ export default function Home() {
                       className={"cell cell-" + t.type.toLowerCase()}
                       key={n}
                       onClick={() => setTile(n)}
-                      aria-label={`Kotak ${n}, ${labels[t.type]}${t.destination ? ", ke " + t.destination : ""}${occupants.length ? ", pemain " + occupants.map((p) => p.name).join(", ") : ""}`}
+                      aria-label={`Tile ${n}, ${labels[t.type]}${t.destination ? ", to " + t.destination : ""}${occupants.length ? ", players " + occupants.map((p) => p.name).join(", ") : ""}`}
                     >
                       <span className="cell-number">{n}</span>
                       <span className="cell-symbol">
@@ -464,13 +464,13 @@ export default function Home() {
                       </span>
                     ))
                 ) : (
-                  <small>Setiap perjalanan dimulai dari nol.</small>
+                  <small>Every journey begins from zero.</small>
                 )}
               </div>
               <small>
                 {room
-                  ? "Pion menunggu di luar papan"
-                  : "Klik kotak untuk melihat efeknya"}
+                  ? "Tokens waiting off-board"
+                  : "Click any tile to inspect its effect"}
               </small>
             </div>
           </section>
@@ -478,50 +478,50 @@ export default function Home() {
             {!room ? (
               <>
                 <section className="card enter-card">
-                  <span className="section-kicker">TEMAN JAUH, TETAP SERU</span>
-                  <h2>Yuk, main bareng.</h2>
-                  <p>Buat ruang kecil untuk cerita besar.</p>
+                  <span className="section-kicker">FAR APART, STILL TOGETHER</span>
+                  <h2>Come on, let's play.</h2>
+                  <p>Create a cozy space for memorable stories.</p>
                   <div className="segmented">
                     <button
                       className={mode === "create" ? "selected" : ""}
                       onClick={() => setMode("create")}
                     >
-                      Buat room
+                      Create room
                     </button>
                     <button
                       className={mode === "join" ? "selected" : ""}
                       onClick={() => setMode("join")}
                     >
-                      Gabung room
+                      Join room
                     </button>
                   </div>
                   <form onSubmit={enter}>
-                    <label htmlFor="name">Nama panggilan</label>
+                    <label htmlFor="name">Nickname</label>
                     <input
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Teman-teman memanggilmu…"
+                      placeholder="What your friends call you…"
                       minLength={2}
                       maxLength={20}
                       required
                       autoComplete="nickname"
                     />
-                    <label>Pilih teman perjalananmu</label>
+                    <label>Choose your travel companion</label>
                     <div className="avatars">
                       {avatars.map((a, i) => (
                         <button
                           type="button"
                           key={a}
                           aria-label={
-                            "Pilih avatar " +
+                            "Choose avatar " +
                             [
-                              "harimau",
-                              "katak",
-                              "kucing",
+                              "tiger",
+                              "frog",
+                              "cat",
                               "panda",
-                              "rubah",
-                              "kelinci",
+                              "fox",
+                              "rabbit",
                             ][i]
                           }
                           aria-pressed={avatar === i}
@@ -534,7 +534,7 @@ export default function Home() {
                     </div>
                     {mode === "join" && (
                       <>
-                        <label htmlFor="code">Kode room</label>
+                        <label htmlFor="code">Room code</label>
                         <input
                           id="code"
                           value={code}
@@ -545,7 +545,7 @@ export default function Home() {
                                 .replace(/[^A-Z2-9]/g, ""),
                             )
                           }
-                          placeholder="Contoh: XJ7K2M"
+                          placeholder="Example: XJ7K2M"
                           minLength={6}
                           maxLength={6}
                           required
@@ -554,23 +554,23 @@ export default function Home() {
                     )}
                     <button className="primary" disabled={busy}>
                       {busy
-                        ? "Menyiapkan…"
+                        ? "Preparing…"
                         : mode === "create"
-                          ? "Buat room baru ↗"
-                          : "Gabung permainan ↗"}
+                          ? "Create new room ↗"
+                          : "Join game ↗"}
                     </button>
                   </form>
                   <div className="privacy-note">
-                    ♧ Tanpa akun · Room privat · 2–6 pemain
+                    ♧ No account required · Private room · 2–6 players
                   </div>
                 </section>
                 <section className="invitation">
                   <span>✦</span>
                   <div>
-                    <h3>Bebas jadi diri sendiri.</h3>
+                    <h3>Feel free to be yourself.</h3>
                     <p>
-                      Kurang nyaman dengan kartu? Selalu boleh lewati. Cukup
-                      mundur 3 kotak.
+                      Uncomfortable with a card? You can always skip. Just step
+                      back 3 tiles.
                     </p>
                   </div>
                 </section>
@@ -579,7 +579,7 @@ export default function Home() {
               <>
                 <section className="card players-card">
                   <div className="section-title">
-                    <h2>{lobby ? "Lobby pemain" : "Teman seperjalanan"}</h2>
+                    <h2>{lobby ? "Player lobby" : "Travel companions"}</h2>
                     <span className="badge">{room.players.length}/6</span>
                   </div>
                   <div className="player-list">
@@ -601,17 +601,17 @@ export default function Home() {
                         </span>
                         <div className="player-name">
                           <b>
-                            {p.name} {p.id === myId && <small>(kamu)</small>}
+                            {p.name} {p.id === myId && <small>(you)</small>}
                           </b>
                           <small>
                             {p.id === room.host ? "♛ Host · " : ""}
                             {lobby
                               ? p.ready
-                                ? "Siap bermain"
-                                : "Menunggu siap"
+                                ? "Ready to play"
+                                : "Waiting to ready up"
                               : playing && p.id === active?.id
-                                ? "Sedang bermain"
-                                : `Kotak ${p.position}`}
+                                ? "Taking turn"
+                                : `Tile ${p.position}`}
                             {now - p.seen > 45000 ? " · Offline" : ""}
                           </small>
                         </div>
@@ -627,8 +627,8 @@ export default function Home() {
                         {isHost && p.id !== myId && (
                           <button
                             className="kick"
-                            aria-label={"Keluarkan " + p.name}
-                            title="Keluarkan pemain"
+                            aria-label={"Kick " + p.name}
+                            title="Kick player"
                             disabled={busy}
                             onClick={() => act("kick", { target: p.id })}
                           >
@@ -640,15 +640,15 @@ export default function Home() {
                   </div>
                   {lobby && (
                     <button className="secondary full" onClick={copy}>
-                      {copied ? "Tautan disalin ✓" : "⧉ Salin undangan"}
+                      {copied ? "Link copied ✓" : "⧉ Copy invite link"}
                     </button>
                   )}
                 </section>
                 {lobby && (
                   <section className="card">
-                    <span className="section-kicker">SEBELUM PERJALANAN</span>
-                    <h2>Atur suasananya.</h2>
-                    <label htmlFor="timer">Waktu kartu</label>
+                    <span className="section-kicker">BEFORE THE JOURNEY</span>
+                    <h2>Set the mood.</h2>
+                    <label htmlFor="timer">Card timer</label>
                     <select
                       id="timer"
                       value={room.timer}
@@ -659,19 +659,19 @@ export default function Home() {
                         })
                       }
                     >
-                      <option value={0}>Default · Truth 60d / Dare 90d</option>
-                      <option value={60}>60 detik</option>
-                      <option value={90}>90 detik</option>
-                      <option value={120}>120 detik</option>
+                      <option value={0}>Default · Truth 60s / Dare 90s</option>
+                      <option value={60}>60 seconds</option>
+                      <option value={90}>90 seconds</option>
+                      <option value={120}>120 seconds</option>
                     </select>
                     <p className="fine-print">
-                      Jawab lewat obrolan atau panggilan kalian. Lewati kartu:
-                      mundur 3 kotak.{" "}
+                      Answer through your chat or call. Skip a card: move back 3
+                      tiles.{" "}
                       <button
                         className="inline-link"
                         onClick={() => setRules(true)}
                       >
-                        Baca aturan
+                        Read rules
                       </button>
                     </p>
                     <button
@@ -680,8 +680,8 @@ export default function Home() {
                       onClick={() => act("ready")}
                     >
                       {me?.ready
-                        ? "✓ Kamu sudah siap · Batalkan"
-                        : "Aku siap bermain ✓"}
+                        ? "✓ You are ready · Cancel"
+                        : "I'm ready to play ✓"}
                     </button>
                     {isHost && (
                       <button
@@ -693,15 +693,15 @@ export default function Home() {
                         }
                         onClick={() => act("start")}
                       >
-                        Mulai perjalanan ↗
+                        Start journey ↗
                       </button>
                     )}
                     <p className="center-note">
                       {room.players.length < 2
-                        ? "Ajak minimal satu teman lagi."
+                        ? "Invite at least one more friend."
                         : !isHost
-                          ? "Host akan memulai saat semua siap."
-                          : "Semua pemain, termasuk host, harus siap."}
+                          ? "The host will start once everyone is ready."
+                          : "All players, including host, must be ready."}
                     </p>
                   </section>
                 )}
@@ -709,12 +709,12 @@ export default function Home() {
                   <section className="card turn-card">
                     <div className="section-title">
                       <span className="section-kicker">
-                        {isTurn ? "SEKARANG GILIRANMU" : "GILIRAN BERMAIN"}
+                        {isTurn ? "YOUR TURN NOW" : "CURRENT TURN"}
                       </span>
                       <span
                         className={"timer " + (remaining <= 10 ? "urgent" : "")}
                       >
-                        ◷ {remaining}d
+                        ◷ {remaining}s
                       </span>
                     </div>
                     <h2>
@@ -723,29 +723,29 @@ export default function Home() {
                     </h2>
                     <p>
                       {room.card
-                        ? "Ada cerita yang menunggumu."
+                        ? "A story awaits you."
                         : isTurn
-                          ? "Satu lemparan, kejutan baru."
-                          : "Tunggu sebentar, giliranmu akan tiba."}
+                          ? "One roll, a new surprise."
+                          : "Hold tight, your turn is coming up."}
                     </p>
                     <div className={"dice-area " + (rolling ? "rolling" : "")}>
                       <div
                         className="die"
-                        aria-label={"Hasil dadu " + room.dice}
+                        aria-label={"Dice result " + room.dice}
                       >
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                           <i
                             key={i}
                             className={
                               (
-                                {
+                                ({
                                   1: [5],
                                   2: [1, 9],
                                   3: [1, 5, 9],
                                   4: [1, 3, 7, 9],
                                   5: [1, 3, 5, 7, 9],
                                   6: [1, 3, 4, 6, 7, 9],
-                                }[room.dice] || []
+                                } as Record<number, number[]>)[room.dice] || []
                               ).includes(i)
                                 ? "pip visible"
                                 : "pip"
@@ -755,8 +755,8 @@ export default function Home() {
                       </div>
                       <span>
                         {room.card
-                          ? "Selesaikan kartumu dahulu"
-                          : "Dadu ditentukan oleh server"}
+                          ? "Complete your card first"
+                          : "Dice rolled by server"}
                       </span>
                     </div>
                     <button
@@ -765,13 +765,13 @@ export default function Home() {
                       onClick={() => act("roll")}
                     >
                       {rolling
-                        ? "Dadu bergulir…"
+                        ? "Rolling dice…"
                         : isTurn
-                          ? "Lempar dadu ↗"
-                          : `Menunggu ${active?.name}…`}
+                          ? "Roll dice ↗"
+                          : `Waiting for ${active?.name}…`}
                     </button>
                     <p className="center-note">
-                      Angka 6 tidak menambah giliran.
+                      Rolling a 6 does not grant an extra turn.
                     </p>
                   </section>
                 )}
@@ -788,15 +788,14 @@ export default function Home() {
                         onClick={() => setMinimized(!minimized)}
                         aria-expanded={!minimized}
                       >
-                        {minimized ? "Buka +" : "Kecilkan −"}
+                        {minimized ? "Open +" : "Minimize −"}
                       </button>
                     </div>
                     {!minimized && (
                       <>
                         <h3>{room.card.text}</h3>
                         <p>
-                          Untuk {active?.name} · lakukan lewat panggilan atau
-                          saat bersama.
+                          For {active?.name} · do this over call or together.
                         </p>
                         {isTurn ? (
                           <div className="challenge-actions">
@@ -806,20 +805,20 @@ export default function Home() {
                               onClick={() => act("complete")}
                             >
                               {room.card.type === "TRUTH"
-                                ? "Sudah dijawab ✓"
-                                : "Selesai ✓"}
+                                ? "Answered ✓"
+                                : "Done ✓"}
                             </button>
                             <button
                               className="skip-button"
                               disabled={busy || !connected}
                               onClick={() => act("skip")}
                             >
-                              Lewati · −3 kotak
+                              Skip · −3 tiles
                             </button>
                           </div>
                         ) : (
                           <p className="fine-print">
-                            Menunggu pemain menyelesaikan atau melewati kartu.
+                            Waiting for player to complete or skip the card.
                           </p>
                         )}
                       </>
@@ -830,22 +829,22 @@ export default function Home() {
                   <section className="card result-card">
                     <span className="trophy">{room.winner ? "🏆" : "⚑"}</span>
                     <span className="section-kicker">
-                      {room.winner ? "SAMPAI DI PUNCAK!" : "SESI BERAKHIR"}
+                      {room.winner ? "REACHED THE TOP!" : "SESSION ENDED"}
                     </span>
                     <h2>
                       {room.players.find((p) => p.id === room.winner)?.name ||
-                        "Terima kasih bermain."}
+                        "Thanks for playing."}
                     </h2>
                     <p>
                       {room.winner
-                        ? "Menang di papan, dekat di pertemanan."
+                        ? "Won on the board, closer in heart."
                         : room.reason}
                     </p>
                     {room.players.map((p) => (
                       <div className="result-row" key={p.id}>
                         <b>{p.name}</b>
                         <span>
-                          {p.truth} Truth · {p.dare} Dare · {p.skipped} lewati
+                          {p.truth} Truth · {p.dare} Dare · {p.skipped} skipped
                         </span>
                       </div>
                     ))}
@@ -855,17 +854,17 @@ export default function Home() {
                         disabled={busy}
                         onClick={() => act("rematch")}
                       >
-                        Main lagi ↗
+                        Play again ↗
                       </button>
                     ) : (
-                      <p>Menunggu host membuka lobby baru.</p>
+                      <p>Waiting for host to open a new lobby.</p>
                     )}
                   </section>
                 )}
                 {!lobby && (
                   <section className="card history-card">
                     <div className="section-title">
-                      <h3>Jejak perjalanan</h3>
+                      <h3>Journey log</h3>
                       <span>↺</span>
                     </div>
                     <ol aria-live="polite">
@@ -881,21 +880,21 @@ export default function Home() {
         </div>
         <div className="bottom-strip">
           <span>
-            01 <b>Ajak orang favoritmu</b>
+            01 <b>Invite your favorite people</b>
           </span>
           <span>
-            02 <b>Lempar & ikuti kejutan</b>
+            02 <b>Roll & follow the surprises</b>
           </span>
           <span>
-            03 <b>Bawa pulang cerita</b>
+            03 <b>Bring home stories</b>
           </span>
-          <button onClick={() => setRules(true)}>Lihat aturan lengkap ↗</button>
+          <button onClick={() => setRules(true)}>View full rules ↗</button>
         </div>
       </main>
       <footer>
         <span className="footer-brand">naikjujur.</span>
-        <span>Dibuat untuk kebersamaan, dimainkan dengan kejujuran.</span>
-        <span>✦ Selalu boleh lewati.</span>
+        <span>Built for connection, played with honesty.</span>
+        <span>✦ Skipping is always allowed.</span>
       </footer>
       {(rules || tile !== null) && (
         <div
@@ -922,7 +921,7 @@ export default function Home() {
             <button
               autoFocus
               className="modal-close"
-              aria-label="Tutup"
+              aria-label="Close"
               onClick={() => {
                 setRules(false);
                 setTile(null);
@@ -932,65 +931,62 @@ export default function Home() {
             </button>
             {rules ? (
               <>
-                <span className="section-kicker">SEBELUM MULAI</span>
+                <span className="section-kicker">BEFORE YOU START</span>
                 <h2 id="modal-title">
-                  Sedikit aturan.
+                  A few rules.
                   <br />
-                  Banyak keseruan.
+                  Lots of fun.
                 </h2>
                 <ol className="rules-list">
                   <li>
-                    Semua pion mulai dari <b>0</b>. Bergiliran lempar dadu untuk
-                    melangkah.
+                    All tokens start at <b>0</b>. Take turns rolling the dice to move.
                   </li>
                   <li>
-                    <b>Tangga naik, ular turun.</b> Efek kotak tujuan
-                    perpindahan tidak dijalankan lagi.
+                    <b>Ladders climb up, snakes slide down.</b> Transfer destination tile
+                    effects are not triggered again.
                   </li>
                   <li>
-                    <b>? Truth</b> dijawab lisan. <b>ϟ Dare</b> dilakukan
-                    langsung. Gunakan panggilan kalian sendiri; aplikasi tidak
-                    merekam jawaban.
+                    <b>? Truth</b> is answered verbally. <b>ϟ Dare</b> is performed directly.
+                    Use your own call or chat; the app never records answers.
                   </li>
                   <li>
-                    Boleh <b>Lewati</b> kapan saja, tanpa alasan. Penalti mundur
-                    3 kotak, minimum 0, tanpa efek tujuan.
+                    You may <b>Skip</b> anytime, no questions asked. Penalty: move back 3
+                    tiles, minimum 0, without destination tile effects.
                   </li>
                   <li>
-                    Waktu lempar <b>30 detik</b>. Default kartu Truth{" "}
-                    <b>60 detik</b> dan Dare <b>90 detik</b>. Waktu kartu habis
-                    = lewati.
+                    Dice roll window: <b>30 seconds</b>. Default card timers: Truth{" "}
+                    <b>60 seconds</b> and Dare <b>90 seconds</b>. Timer expiring = skipped.
                   </li>
                   <li>
-                    Menang dengan <b>tepat mencapai 100</b>. Jika dadu berlebih,
-                    pion tetap. Angka 6 tidak memberi giliran tambahan.
+                    Win by <b>landing exactly on 100</b>. Overshooting rolls keep the token in place.
+                    Rolling a 6 does not give an extra turn.
                   </li>
                   <li>
-                    2–6 pemain. Koneksi putus punya tenggang 60 detik setelah
-                    dinyatakan offline; host berpindah otomatis.
+                    2–6 players. Disconnected players have a 60-second grace window after being
+                    marked offline; host migrates automatically.
                   </li>
                 </ol>
                 <button className="primary" onClick={() => setRules(false)}>
-                  Paham, ayo main ↗
+                  Got it, let's play ↗
                 </button>
               </>
             ) : (
               tile !== null && (
                 <>
-                  <span className="section-kicker">KOTAK {tile}</span>
+                  <span className="section-kicker">TILE {tile}</span>
                   <h2 id="modal-title">
                     {tile === 100
-                      ? "Garis akhir ⚑"
+                      ? "Finish line ⚑"
                       : labels[board[tile - 1].type]}
                   </h2>
                   <p>
                     {board[tile - 1].destination
-                      ? `Pindah ke kotak ${board[tile - 1].destination}. Efek kotak tujuan tidak dipicu.`
+                      ? `Move to tile ${board[tile - 1].destination}. Destination tile effect is not triggered.`
                       : board[tile - 1].type === "EMPTY"
-                        ? "Kotak netral. Istirahat sejenak, giliran berlanjut."
+                        ? "Neutral tile. Catch your breath, your turn continues."
                         : board[tile - 1].type === "TRUTH"
-                          ? "Berhenti di sini untuk menjawab pertanyaan. Boleh lewati dengan mundur 3 kotak."
-                          : "Berhenti di sini untuk melakukan tantangan. Boleh lewati dengan mundur 3 kotak."}
+                          ? "Stop here to answer a truth question. You may skip by moving back 3 tiles."
+                          : "Stop here to perform a dare. You may skip by moving back 3 tiles."}
                   </p>
                 </>
               )
