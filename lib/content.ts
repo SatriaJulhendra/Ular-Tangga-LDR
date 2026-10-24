@@ -1,4 +1,5 @@
 export const topics = [
+  "what makes you horny?",
   "Which part of your partner's body do you find most attractive? Why?",
   "When was the last time you felt completely captivated by me?",
   "What kind of touch makes you feel most loved?",
@@ -10,8 +11,22 @@ export const topics = [
   "If we had 24 hours together with no plans or distractions, how would you spend it?",
   "What do you imagine our first hug will feel like when we reunite? What will you whisper?",
   "If you showed up as a surprise without telling me, how do you think I'd react?",
+  "What do you miss the most about me?",
+  "When do you miss me the most?",
+  "What is the hardest part of being in a long-distance relationship?",
+  "Do you ever feel lonely without me?",
+  "What makes you feel loved by me, even from far away?",
+  "Do you think we communicate enough with each other?",
+  "What should we do when we have misunderstandings?",
+  "Have you ever been afraid of losing me?",
+  "What is one thing you wish I understood better about you?",
+  "What would you do if we had a serious problem in our relationship?",
+  "Do you see a future with me?",
+  "What is the first thing you want to do when we meet again?",
+  "How do you imagine our life together in the future?",
+  "What keeps you committed to this relationship?",
+  "What is something new you would like us to experience together?",
 
-  // Adults: Level 2 (Understanding Preferences)
   "What makes you feel most comfortable and turned on when we're alone together?",
   "What kind of mood do you like for intimate moments (music, lighting, scents)?",
   "Do you prefer intimate moments to be spontaneous or planned?",
@@ -23,8 +38,7 @@ export const topics = [
   "On a quiet beach at sunset, what kind of atmosphere do you picture with me?",
   "What does your dream bedroom look like for a romantic night (scents, music, lighting)?",
   "If we went on a spontaneous road trip with no destination, where would you want us to stop?",
-
-  // Adults: Level 3 (Intimate & Open)
+  "Which part of your body is the most sensitive so it is easy to make you horny?",
   "What new experience are you most curious for us to try together?",
   "What style or vibe are you most intrigued to explore together?",
   "What are your thoughts on adult films? Have you watched them, and how do you feel about them?",
@@ -38,7 +52,6 @@ export const topics = [
   "If our story were turned into a movie, which scene would be the most romantic?",
   "If we swapped lives for a day, what would you do and discover about me?",
 
-  // Adults: Level 4 (Reflection & Commitment)
   "What is one thing you would like to change or deepen in our intimacy?",
   "What is something you've wanted but haven't dared to tell me yet?",
   "How can we keep the romantic spark burning bright for years to come?",
@@ -47,7 +60,6 @@ export const topics = [
   "If you close your eyes and let me guide your imagination, what would you want to envision?",
   "When we see each other next, what kind of touch are you looking forward to the most?",
 
-  // Fantasy & Imagination: Dream Meeting
   "The first time you see me again after being apart for so long, what will you do?",
   "If we had 24 hours together with no schedule, how would you spend it?",
   "What do you picture our first embrace will be like? What will you whisper?",
@@ -57,48 +69,92 @@ export const topics = [
   "If we could take an unlimited budget romantic getaway, where would we go and what would you look forward to most?",
   "If you wrote a letter to me from yourself five years in the future, what would it say?",
 
-  // Fantasy & Imagination: Places & Ambience
   "If we were stranded by rain in a mountain cabin, just the two of us, what would you want to do?",
   "On a quiet beach at twilight, what kind of vibe do you imagine sharing with me?",
   "What does your dream room look like for a romantic night (scents, music, lighting)?",
   "If we drove without a destination, where would you want us to stop?",
 
-  // Fantasy & Imagination: Roleplay & Story
   "If we pretended to meet as strangers in a cafe, what opening line would you use to flirt with me?",
   "If we were secret agent partners, what secret romantic code would you send me?",
   "If our story were turned into a movie, which scene would be the most romantic?",
   "If we traded lives for a day, what would you do and discover about me?",
   "Is there a romantic fantasy you've kept to yourself that you'd like to share, as far as you feel comfortable?",
-  "If we wrote a romantic story together taking turns, how would you start the opening sentence?",
   "On a scale of 1 to 10, how adventurous do you feel trying new ideas with me? Why?",
   "What things fall into your 'yes', 'maybe', and 'not ready' zones?",
 
-  // Fantasy & Imagination: Senses & Sensations
   "What scent reminds you most of me, and what memory comes alive in your mind?",
   "What words or sound from me do you crave hearing most right now?",
   "If you close your eyes and let me guide your imagination, what would you picture?",
   "When we finally meet, what kind of touch are you looking forward to the most?",
+  "what do you imagine when you masturbate",
 
-  // Fantasy & Imagination: Future Dreams
   "What would our dream home look like, and what small nighttime routine would we share?",
   "How do you imagine our first morning waking up side-by-side with no distance?",
   "If we had an all-expenses-paid romantic vacation, where would we go and what would you look forward to most?",
   "If you wrote a letter to me from yourself five years from now, what would it say?",
 
-  // Fantasy & Imagination: Honest Fantasies
   "Is there a romantic fantasy you've kept secret that you're willing to share, as much as you're comfortable with?",
   "If we took turns writing a romantic story together, what would you make the very first line?",
   "On a scale of 1 to 10, how adventurous are you to try new things with me? Why?",
   "What things fall into your \"yes\", \"maybe\", and \"not ready yet\" zones?",
+  "Have you ever tried to stimulate yourself? What did you feel?",
 
-  // Special Cards
-  "Which card would you trade away, and what kind of question would you want instead?",
-  "What fantasy question would you like to ask me?",
-  "What can I do to make you feel comforted and deeply cherished after this conversation?",
+
 ];
 
 export const dares = [
   // Level 1: Teasing from Afar
+  "Tell us about your first orgasm experience?",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
+  "take off 1 piece of clothing you are wearing",
   "Send a bedtime voice note in your softest, warmest whisper, describing what you want us to do when we finally meet.",
   "Send a photo of what you're wearing today and tell me which part you wish I could see in person.",
   "Name 3 physical things about your partner that you miss most (scent, hugs, gaze, etc.).",
